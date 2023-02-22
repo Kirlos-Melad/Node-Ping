@@ -10,8 +10,8 @@ import {
 	token_config,
 } from "../configurations/environment-varaibles.js";
 import ServerError from "../classes/server-error.js";
-import logsDocument from "../documents/logs.document.js";
-import devicesDocument from "../documents/devices.document.js";
+import logsDocument from "../documents/System/logs.document.js";
+import devicesDocument from "../documents/Users/devices.document.js";
 
 const ResponseStatus = {
 	// Used with authentication failure

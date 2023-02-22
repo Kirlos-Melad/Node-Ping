@@ -13,8 +13,11 @@ import {
 } from "./configurations/environment-varaibles.js";
 import ServerError from "./classes/server-error.js";
 import RootRouter from "./routers/root.router.js";
+import serverHelper from "./helpers/server.helper.js";
+import devicesDocument from "./documents/Users/devices.document.js";
+import JobScheduler from "./classes/job-scheduler.js";
+import { LogType } from "./documents/System/logs.document.js";
 
-import devicesDocument from "./documents/devices.document.js";
 function InitializeServer() {
 	// Express express_server
 	const express_server = express();
@@ -35,10 +38,10 @@ function InitializeServer() {
 			return response
 				.status(400)
 				.json(
-					await ServerHelper.CreateResponse(
+					await serverHelper.CreateResponse(
 						LogType.CLIENT_ERROR,
 						request,
-						ServerHelper.ResponseStatus.FAILURE,
+						serverHelper.ResponseStatus.FAILURE,
 						"Bad JSON format",
 						ServerError.CreateFromError(
 							error,
@@ -61,6 +64,12 @@ async function StartServer() {
 
 		await mongoose.connect(mongodb_uri);
 		console.log("Connected to DB");
+
+		const job_scheduler_instance = JobScheduler.GetInstance(
+			mongoose.connection,
+		);
+
+		job_scheduler_instance.Start();
 
 		await server.listen(port, "0.0.0.0");
 

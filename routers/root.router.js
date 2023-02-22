@@ -1,7 +1,7 @@
 // Libraries
 import express from "express";
 import ServerError from "../classes/server-error.js";
-import { LogType } from "../documents/logs.document.js";
+import { LogType } from "../documents/System/logs.document.js";
 import serverHelper from "../helpers/server.helper.js";
 import AuthenticationMiddleware from "../middlewares/authentication.middleware.js";
 import ExcludePathsMiddleware from "../middlewares/exclude-paths.middleware.js";

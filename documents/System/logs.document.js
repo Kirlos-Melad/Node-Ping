@@ -3,8 +3,8 @@ import moment from "moment";
 import mongoose from "mongoose";
 
 // Modules
-import dateHelper from "../Helpers/date.helper.js";
-import ServerError from "../classes/server-error.js";
+import dateHelper from "../../Helpers/date.helper.js";
+import ServerError from "../../classes/server-error.js";
 
 const Schema = mongoose.Schema;
 

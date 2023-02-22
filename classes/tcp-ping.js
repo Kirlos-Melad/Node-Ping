@@ -9,19 +9,34 @@ class TcpPing extends IPing {
 		super();
 	}
 
-	Ping(url, { path, port, headers, threshhold }) {
+	Ping({ url, port, threshold, timeout }) {
 		const options = {
-			method: "HEAD",
-
-			hostname: url,
-			path: path,
-			port: port,
-
-			headers: headers,
+			url,
+			port,
 		};
 
-		const socket = new net.Socket();
+		return new Promise((resolve, reject) => {
+			const makeRequest = () => {
+				threshold--;
 
-		socket.connect()
+				const request = net.connect(options, (socket) => {
+					request.end();
+					resolve(socket);
+				});
+
+				request.on("error", (error) => {
+					// Retry on connection errors
+					if (threshold) {
+						setTimeout(makeRequest, timeout);
+					} else {
+						reject(error);
+					}
+				});
+			};
+
+			makeRequest();
+		});
 	}
 }
+
+export default TcpPing;

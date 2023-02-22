@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 import validator from "validator";
 
 // Modules
-import usersDocument from "../documents/users.document.js";
-import devicesDocument from "../documents/devices.document.js";
+import usersDocument from "../documents/Users/users.document.js";
+import devicesDocument from "../documents/Users/devices.document.js";
 import serverHelper from "../helpers/server.helper.js";
-import { LogType } from "../documents/logs.document.js";
+import { LogType } from "../documents/System/logs.document.js";
 import ServerError from "../classes/server-error.js";
 
 /**

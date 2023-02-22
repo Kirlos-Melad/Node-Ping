@@ -65,4 +65,45 @@ async function Create({ check_id, tag_list }, { session }) {
 	}
 }
 
-export default Object.freeze({ Create });
+async function FindByTagNameList({ tags_whitelist, tags_blacklist }) {
+	try {
+		const match_operator = { $match: {} };
+
+		if (tags_whitelist && tags_blacklist)
+			match_operator.$match.$and = [
+				{
+					tag_name: {
+						$in: tags_whitelist,
+					},
+				},
+				{
+					tag_name: {
+						$nin: tags_blacklist,
+					},
+				},
+			];
+		else if (tags_whitelist)
+			match_operator.$match.tag_name = {
+				$in: tags_whitelist,
+			};
+		else if (tags_blacklist)
+			match_operator.$match.tag_name = { $nin: tags_blacklist };
+
+		const result = await ChecksTagsDocument.aggregate([
+			match_operator,
+
+			{
+				$group: {
+					_id: "$check_id",
+					tags: { $addToSet: "$tag_name" },
+				},
+			},
+		]);
+
+		return { error: null, result: result };
+	} catch (error) {
+		return { error: error, result: null };
+	}
+}
+
+export default Object.freeze({ Create, FindByTagNameList });

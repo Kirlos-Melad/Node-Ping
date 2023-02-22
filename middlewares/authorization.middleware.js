@@ -1,6 +1,6 @@
 // Modules
 import ServerError from "../classes/server-error.js";
-import { LogType } from "../documents/logs.document.js";
+import { LogType } from "../documents/System/logs.document.js";
 import serverHelper from "../helpers/server.helper.js";
 
 /**
@@ -26,7 +26,7 @@ function AuthorizationMiddleware(roles, is_whitelist) {
 	return async (request, response, next) => {
 		try {
 			const { roles: user_roles } = request.auth.user;
-            
+
 			if (IsExist(user_roles, roles) !== is_whitelist)
 				throw new ServerError(
 					ServerError.CustomNames.UNAUTHORIZED,

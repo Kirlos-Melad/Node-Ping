@@ -9,9 +9,9 @@ class HttpPing extends IPing {
 		super();
 	}
 
-	Ping(url, { path, port, headers, threshhold }) {
+	Ping({ url, path, port, headers, threshold, timeout }) {
 		const options = {
-			method: "HEAD",
+			method: "GET",
 
 			hostname: url,
 			path: path,
@@ -20,11 +20,46 @@ class HttpPing extends IPing {
 			headers: headers,
 		};
 
-		const response = http.request(options);
+		return new Promise((resolve, reject) => {
+			const makeRequest = () => {
+				threshold--;
 
-		console.log(response);
+				const request = http.request(options, (response) => {
+					if (
+						response.statusCode >= 200 &&
+						response.statusCode < 300
+					) {
+						response.on("end", () => {
+							resolve(response);
+						});
+					} else {
+						// Retry on non-2xx status codes
+						if (threshold) {
+							setTimeout(makeRequest, timeout);
+						} else {
+							reject(
+								new Error(
+									`HTTP request failed with status code ${response.statusCode}`,
+								),
+							);
+						}
+					}
+				});
 
-		response.end();
+				request.on("error", (error) => {
+					// Retry on connection errors
+					if (threshold) {
+						setTimeout(makeRequest, timeout);
+					} else {
+						reject(error);
+					}
+				});
+
+				request.end();
+			};
+
+			makeRequest();
+		});
 	}
 }
 

@@ -42,7 +42,7 @@ const CheckSchema = new Schema(
 			default: ms(`5 seconds`),
 		},
 
-		intervals: {
+		interval: {
 			type: Number,
 			default: ms(`10 minutes`),
 		},
@@ -52,7 +52,7 @@ const CheckSchema = new Schema(
 			default: 1,
 		},
 
-		http_headers: {
+		headers: {
 			type: {},
 			default: {},
 		},
@@ -101,7 +101,7 @@ async function Create(
 		timeout,
 		interval,
 		threshold,
-		http_headers,
+		headers,
 		assert,
 		ignore_ssl,
 	},
@@ -120,7 +120,7 @@ async function Create(
 					timeout,
 					interval,
 					threshold,
-					http_headers,
+					headers,
 					assert,
 					ignore_ssl,
 				},

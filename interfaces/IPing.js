@@ -20,7 +20,7 @@ class IPing {
 	 *  - `headers` A list of key/value pairs custom HTTP headers to be sent with the ping request
 	 *  - `threshhold` The threshold of acceptable failed requests
 	 */
-	Ping(url, { path, port, headers, threshhold }) {
+	async Ping(url, { path, port, headers, threshhold }) {
 		throw new ServerError(
 			ServerError.CustomNames.INVALID_IMPLEMENTATION,
 			"You must implement 'Ping' method!",

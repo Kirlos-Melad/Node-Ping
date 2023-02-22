@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 // Modules
-import ServerError from "../classes/server-error.js";
+import ServerError from "../../classes/server-error.js";
 
 const Schema = mongoose.Schema;
 

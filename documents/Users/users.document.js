@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 // Modules
-import ServerError from "../classes/server-error.js";
-import validatorHelper from "../helpers/validator.helper.js";
+import ServerError from "../../classes/server-error.js";
+import validatorHelper from "../../helpers/validator.helper.js";
 
 const Schema = mongoose.Schema;
 
