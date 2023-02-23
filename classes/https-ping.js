@@ -9,12 +9,13 @@ class HttpsPing extends IPing {
 		super();
 	}
 
-	Ping({ url, path, headers, ignore_ssl, threshold, timeout }) {
+	Ping({ url, path, port, headers, ignore_ssl, threshold, timeout }) {
 		const options = {
 			method: "GET",
 
 			hostname: url,
 			path: path,
+			port: port,
 
 			headers: headers,
 
