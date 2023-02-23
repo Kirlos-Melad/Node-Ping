@@ -78,20 +78,18 @@ async function CreateOrUpdate({
 	response_time,
 }) {
 	try {
-		let is_outage = false;
-		if (status === PollingRequestStatus.DOWN) {
-			const report = await ChecksReportsDocument.findOne(
-				{ check_id },
-				{},
-				{ $sort: { created_at: -1 } },
-			)
-				.lean()
-				.exec();
+		const old_report = await ChecksReportsDocument.findOne(
+			{ check_id },
+			{},
+			{ $sort: { created_at: -1 } },
+		)
+			.lean()
+			.exec();
 
-			is_outage = !report || report.status === PollingRequestStatus.UP;
-		}
+		const is_outage =
+			!old_report || old_report.status === PollingRequestStatus.UP;
 
-		const result = await ChecksReportsDocument.findOneAndUpdate(
+		const report = await ChecksReportsDocument.findOneAndUpdate(
 			{ check_id },
 			{
 				status,
@@ -107,11 +105,14 @@ async function CreateOrUpdate({
 			.lean()
 			.exec();
 
-		console.log(result);
-
-		return { error: null, result: result };
+		return {
+			error: null,
+			result: {
+				report,
+				is_swapped: old_report?.status !== report?.status,
+			},
+		};
 	} catch (error) {
-		console.log(error);
 		// Return the error As-Is if already Server Error
 		if (error instanceof ServerError) return { error, result: null };
 		// Else return the error after converting it to Server Error

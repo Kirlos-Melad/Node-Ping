@@ -15,22 +15,27 @@ import pollingRequestsDocument, {
 	PollingRequestStatus,
 } from "../documents/Checks/polling-requests.document.js";
 import checksReportsDocument from "../documents/Checks/checks-reports.document.js";
+import mailHelper from "../helpers/mail.helper.js";
 
-async function PostChecks__CreateJob({
-	_id,
-	url,
-	path,
-	port,
-	headers,
-	ignore_ssl,
-	threshold,
-	timeout,
-	interval,
-}) {
+async function PostChecks__CreateJob(
+	{ user_name, user_email },
+	{
+		_id,
+		name: check_name,
+		url,
+		path,
+		port,
+		headers,
+		ignore_ssl,
+		threshold,
+		timeout,
+		interval,
+	},
+) {
 	const pinger = pingerHelper.GetPinger(port);
 
 	JobScheduler.GetInstance().CreateJob(_id.toString(), interval, async () => {
-		const SaveResponse = (status_type) => {
+		const SaveResponse = async (status_type) => {
 			const response_time = Date.now() - start_time;
 			pollingRequestsDocument.Create({
 				check_id: _id,
@@ -43,12 +48,26 @@ async function PostChecks__CreateJob({
 
 			const is_up = status_type === PollingRequestStatus.UP;
 
-			checksReportsDocument.CreateOrUpdate({
+			return await checksReportsDocument.CreateOrUpdate({
 				check_id: _id,
 				status: status_type,
 				up_time: is_up ? response_time + interval : 0,
 				down_time: is_up ? 0 : response_time + interval,
 				response_time: response_time,
+			});
+		};
+
+		const SendAlert = async (status_type, is_swapped) => {
+			if (!is_swapped) return;
+
+			mailHelper.SendMail({
+				mail_list: [user_email],
+				subject: `Your check status upate`,
+				message: mailHelper.DefaultMessages.CheckStatusAlert(
+					user_name,
+					check_name,
+					status_type === PollingRequestStatus.UP ? "UP" : "DOWN",
+				),
 			});
 		};
 
@@ -64,9 +83,12 @@ async function PostChecks__CreateJob({
 				timeout: timeout,
 			});
 
-			SaveResponse(PollingRequestStatus.UP);
+			const { result } = await SaveResponse(PollingRequestStatus.UP);
+
+			SendAlert(PollingRequestStatus.UP, result?.is_swapped);
 		} catch (error) {
-			SaveResponse(PollingRequestStatus.DOWN);
+			const { result } = await SaveResponse(PollingRequestStatus.DOWN);
+			SendAlert(PollingRequestStatus.DOWN, result?.is_swapped);
 		}
 	});
 }
@@ -182,7 +204,13 @@ async function PostChecks(request, response) {
 				ServerError.Handlers.SERVER,
 			);
 
-		PostChecks__CreateJob(check_res);
+		PostChecks__CreateJob(
+			{
+				user_name: request.auth.user.name,
+				user_email: request.auth.user.email,
+			},
+			check_res,
+		);
 
 		await session.commitTransaction();
 		session.endSession();
