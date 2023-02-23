@@ -45,20 +45,17 @@ async function GetReports(request, response) {
 				request,
 				serverHelper.ResponseStatus.SUCCESS,
 				"Created checks reports",
-				rep_res.reduce(
-					(
-						obj,
-						{
-							check_id,
-							status,
-							up_time,
-							down_time,
-							outage_number,
-							response_time,
-							history,
-						},
-					) => {
-						obj[check_id] = {
+				rep_res.map(
+					({
+						check_id,
+						status,
+						up_time,
+						down_time,
+						outage_number,
+						response_time,
+						history,
+					}) => {
+						return {
 							tags: check_res_reduced[check_id].tags,
 							status,
 							up_time,
@@ -68,10 +65,7 @@ async function GetReports(request, response) {
 							response_time,
 							history,
 						};
-
-						return obj;
 					},
-					check_res_reduced,
 				),
 			),
 		);
