@@ -169,7 +169,10 @@ async function PostChecks(request, response) {
 			);
 
 		const { error: check_tag_err, result: check_tag_res } =
-			await checksTagsDocument.Create({ user_id, tag_list }, { session });
+			await checksTagsDocument.Create(
+				{ check_id: check_res._id, tag_list },
+				{ session },
+			);
 
 		if (check_tag_err) throw check_tag_err;
 		else if (!check_tag_res)

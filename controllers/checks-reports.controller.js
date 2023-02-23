@@ -21,17 +21,15 @@ async function GetReports(request, response) {
 				ServerError.Handlers.SERVER,
 			);
 
-		console.log(check_res);
+		const check_res_reduced = {};
+		const check_id_list = check_res.map(({ _id, tags }) => {
+			check_res_reduced[_id] = tags;
 
-		const check_res_reduced = check_res.reduce((obj, { _id, tags }) => {
-			obj[_id] = { tags };
-			return obj;
-		}, {});
+			return _id;
+		});
 
 		const { error: rep_err, result: rep_res } =
-			await checksReportsDocument.FindByCheckIdList(
-				Object.keys(check_res_reduced),
-			);
+			await checksReportsDocument.FindByCheckIdList(check_id_list);
 
 		if (rep_err) throw rep_err;
 		else if (!rep_res)

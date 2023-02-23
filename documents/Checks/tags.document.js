@@ -42,7 +42,25 @@ TagSchema.index({ user_id: 1, name: 1 }, { unique: 1 });
 
 const TagsDocument = mongoose.model("tags", TagSchema);
 
-async function Create({ user_id, name }) {}
+async function Create({ user_id, name }) {
+	try {
+		const result = await TagsDocument.create({ user_id, name });
+
+		return { error: null, result: result };
+	} catch (error) {
+		// Return the error As-Is if already Server Error
+		if (error instanceof ServerError) return { error, result: null };
+		// Else return the error after converting it to Server Error
+		else
+			return {
+				error: ServerError.CreateFromError(
+					error,
+					ServerError.Handlers.CLIENT,
+				),
+				result: null,
+			};
+	}
+}
 
 async function FindByUserId({ user_id }) {
 	try {
